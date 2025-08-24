@@ -14,6 +14,9 @@ import com.example.EzMeet.dto.admin.UpdateVoyagureRequest;
 import com.example.EzMeet.dto.admin.VoyagureResponse;
 import com.example.EzMeet.repository.RoleRepository;
 import com.example.EzMeet.repository.UserRepository;
+import com.example.EzMeet.service.EmailService;
+import com.example.EzMeet.service.EmailVerificationService;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -23,13 +26,17 @@ public class VoyagureManagment {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public VoyagureManagment(UserRepository userRepository,RoleRepository roleRepository,PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
-    
+    private final EmailVerificationService emailVerificationService;
+ 
+    public VoyagureManagment(UserRepository userRepository,
+            RoleRepository roleRepository,
+            PasswordEncoder passwordEncoder,
+            EmailVerificationService emailVerificationService) {
+				this.userRepository = userRepository;
+				this.roleRepository = roleRepository;
+				this.passwordEncoder = passwordEncoder;
+				this.emailVerificationService = emailVerificationService; 
+				}
     
 
 
@@ -59,8 +66,10 @@ public class VoyagureManagment {
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setCreatedAt(LocalDateTime.now());
         user.setRole(role);
+        user.setEmailVerified(false);
         User saved = userRepository.save(user);
-        return new VoyagureResponse(
+        emailVerificationService.sendVerificationEmail(saved);
+         return new VoyagureResponse(
                 saved.getName(),
                 saved.getFirst_name(),
                 saved.getEmail(),
