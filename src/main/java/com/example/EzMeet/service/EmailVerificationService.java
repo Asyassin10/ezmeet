@@ -77,7 +77,7 @@ public class EmailVerificationService {
         user.setEmailVerified(true);
         userRepository.save(user);
 
-        tokenRepository.delete(verificationToken); // حذف التوكن بعد التفعيل
+        tokenRepository.delete(verificationToken);
         return true;
     }
 
